@@ -8,9 +8,10 @@ from bs4 import BeautifulSoup
 from splinter import Browser
 from selenium import webdriver
 import time
+from pymongo import MongoClient
 
 class Duobao:
-	baseurl = "http://1.163.com/user/win.do?cid=43279246"
+	baseurl = "http://1.163.com/user/win.do?cid=12188415"
 	urls = []
 	def getdata(self):
 		url = str(self.baseurl)
@@ -24,15 +25,20 @@ class Duobao:
 		soup = BeautifulSoup(html, "lxml")
 		# print(soup.prettify())
 		# print(soup.find_all('a'))
-		links = soup.find_all('a', href=re.compile('http'))
+		links = soup.find_all('a', href=re.compile('http://1.163.com'))
 		for link in links:
 			addr = link.get('href')
 			if self.checkUrl(addr):
 				pass
-			print(str('获取链接：') + addr)
-			self.getdatas(addr)
+			else:
+				print(str('---------------------geturl:') + addr)
+				# self.getdatas(addr)
+				self.urls.append(addr)
+				self.getdatas(addr)
+			
 			# print(addr)
 	def getdatas(self, url):
+		self.crawData(url, 'body')
 		res = requests.get(url)
 		html = res.content
 		try:
@@ -43,10 +49,20 @@ class Duobao:
 		soup = BeautifulSoup(html, "lxml")
 		# print(soup.prettify())
 		# print(soup.find_all('a'))
-		links = soup.find_all('a')
+		links = soup.find_all('a', href=re.compile('index.do\?cid='))
 		for link in links:
-			print(link.get('href'))	
+			addr = link.get('href')
+			if self.checkUrl(addr):
+				print('url exists!')
+				pass
+			else:
+				print(str('---------------------geturl:') + addr)
+				self.urls.append(addr)
+				self.getdatas(addr)
+			
 	def checkUrl(self, url):
+		print self.urls
+		print url
 		for turl in self.urls:
 			if turl == url:
 				return True
@@ -57,16 +73,16 @@ class Duobao:
 			sp = BeautifulSoup(browser.html, "lxml")
 			print(sp.prettify())
 
-	def crawData(self, url):
+	def crawData(self, url, tag_name):
 		driver = webdriver.PhantomJS()
 		driver.get(url);
-		time.sleep(2)
-		data = driver.find_element_by_tag_name('body')
+		# time.sleep(2)
+		data = driver.find_element_by_tag_name(tag_name)
 		print data.text
 		driver.quit()
 						
 	def __unicode__(self):
 		return self.baseurl
 
-# dt = Duobao()
-# dt.getdata()
+db = Duobao()
+db.getdata()

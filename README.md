@@ -7,3 +7,4 @@ python+PhantomJS+selenium+BeautifulSoup+.....抓取一个网站的链接以及�
 [http://drops.wooyun.org/tips/3915](http://drops.wooyun.org/tips/3915)  
 [splinter api doc](http://splinter.readthedocs.org/en/latest/drivers/chrome.html)  
 [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/bs4/doc/index.zh.html)  
+[python-mongodb](http://docs.mongodb.org/ecosystem/drivers/python/)  
