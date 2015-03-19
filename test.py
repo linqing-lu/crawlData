@@ -7,7 +7,6 @@ import re
 from bs4 import BeautifulSoup
 from splinter import Browser
 from selenium import webdriver
-import time
 from pymongo import MongoClient
 
 class Duobao:
@@ -96,7 +95,7 @@ class Duobao:
 		for dt2 in data2:
 			print dt2.text
 		driver.quit()
-		
+
 	def crawData3(self, url, tag_name):
 		driver = webdriver.PhantomJS()
 		driver.get(url);
@@ -105,9 +104,39 @@ class Duobao:
 			print dt.text
 			print "====================================="
 		driver.quit()
+
+	def fetchUrl(self, url):
+		url = str(self.baseurl)
+		res = requests.get(url)
+		html = res.content
+		try:
+			html = html.decode('utf-8')
+		except:
+			pass
+		# print(html)
+		soup = BeautifulSoup(html, "lxml")
+		# print(soup.prettify())
+		# print(soup.find_all('a'))
+		links = soup.find_all('a', href=re.compile('http://1.163.com'))
+		for link in links:
+			addr = link.get('href')
+			if self.checkUrl(addr):
+				pass
+			else:
+				print(str('---------------------fetchurl:') + addr)
+				self.urls.append(addr)
+				self.fetchUrl(addr)
+
+	def saveToMongoDB(self, data):
+		client = MongoClient('mongodb://198.52.117.75:27017/')
+		db = clinet.Duobao
+
+		clinet.close()
+		pass
 	def __unicode__(self):
 		return self.baseurl
 
 db = Duobao()
 # db.getdata()
-db.crawData(db.baseurl, 'table')
+# db.crawData(db.baseurl, 'table')
+db.fetchUrl('http://1.163.com')
