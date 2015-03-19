@@ -11,7 +11,7 @@ import time
 from pymongo import MongoClient
 
 class Duobao:
-	baseurl = "http://1.163.com/user/win.do?cid=12188415"
+	baseurl = "http://1.163.com/history/01-48-00-18-33.html"
 	urls = []
 	def getdata(self):
 		url = str(self.baseurl)
@@ -25,7 +25,7 @@ class Duobao:
 		soup = BeautifulSoup(html, "lxml")
 		# print(soup.prettify())
 		# print(soup.find_all('a'))
-		links = soup.find_all('a', href=re.compile('http://1.163.com'))
+		links = soup.find_all('a', href=re.compile('detail/01-48-'))
 		for link in links:
 			addr = link.get('href')
 			if self.checkUrl(addr):
@@ -49,7 +49,7 @@ class Duobao:
 		soup = BeautifulSoup(html, "lxml")
 		# print(soup.prettify())
 		# print(soup.find_all('a'))
-		links = soup.find_all('a', href=re.compile('index.do\?cid='))
+		links = soup.find_all('a', href=re.compile('detail/01-48-'))
 		for link in links:
 			addr = link.get('href')
 			if self.checkUrl(addr):
