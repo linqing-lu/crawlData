@@ -4,6 +4,7 @@ import time
 import random
 import requests
 import re
+import codecs
 from bs4 import BeautifulSoup
 from splinter import Browser
 from selenium import webdriver
@@ -78,9 +79,23 @@ class Duobao:
 		driver = webdriver.PhantomJS()
 		driver.get(url);
 		data = driver.find_elements_by_tag_name('table')
-		for dt in data:
-			print dt.text
-			print "====================================="
+		running = True
+		fp = codecs.open("/Users/lm/test.txt", 'a+', 'utf-8')
+		while running:
+			for dt in data:
+				print dt.text
+				fp.write(dt.text);
+				fp.write("\n=====================================\n")
+				print "====================================="
+			running = len(data) > 10
+
+			print running
+			if running:
+				btn_next = driver.find_element_by_class_name('w-pager-next')
+				btn_next.click()
+				time.sleep(3)
+				data = driver.find_elements_by_tag_name('table')
+		fp.close()
 		driver.quit()
 
 	def crawData2(self, url, tag_name):
@@ -138,5 +153,5 @@ class Duobao:
 
 db = Duobao()
 # db.getdata()
-# db.crawData(db.baseurl, 'table')
-db.fetchUrl('http://1.163.com')
+db.crawData(db.baseurl, 'table')
+# db.fetchUrl('http://1.163.com')
