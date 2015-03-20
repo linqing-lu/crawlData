@@ -9,3 +9,4 @@ python+PhantomJS+selenium+BeautifulSoup+.....抓取一个网站的链接以及�
 [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/bs4/doc/index.zh.html)  
 [python-mongodb](http://docs.mongodb.org/ecosystem/drivers/python/)  
 [正则表达式](http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html)  
+[python-sqlite](http://www.w3cschool.cc/sqlite/sqlite-python.html)  

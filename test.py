@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from splinter import Browser
 from selenium import webdriver
 from pymongo import MongoClient
-cid = 20592113
+cid = 15191257
 class Duobao:
 	filter1 = "\?cid="
 	filter2 = "index.do\?cid="
@@ -66,8 +66,6 @@ class Duobao:
 				self.getdatas(addr)
 			
 	def checkUrl(self, url):
-		# print self.urls
-		# print url
 		for turl in self.urls:
 			if turl == url:
 				return True
@@ -83,10 +81,10 @@ class Duobao:
 		driver = webdriver.PhantomJS()
 		driver.get(url);
 		running = True
-		fp = codecs.open("/Users/lm/test.txt", 'a+', 'utf-8')
+		# fp = codecs.open("/Users/lm/test.txt", 'a+', 'utf-8')
 		data = driver.find_elements_by_tag_name('table')
 		while running:
-			self.dealData(data, fp)
+			self.dealData(data, 0)
 			running = len(data) > 10
 			print running
 			if running:
@@ -94,10 +92,11 @@ class Duobao:
 				btn_next.click()
 				time.sleep(1)
 				data = driver.find_elements_by_tag_name('table')
-		fp.close()
+		# fp.close()
 		driver.quit()
-		save_data = {"cid": cid, "total_count": self.total_count}
-		self.saveToMongoDB(save_data)
+		if self.total_count > 0:
+			save_data = {"_id": cid, "cid": cid, "total_count": self.total_count}
+			self.saveToMongoDB(save_data)
 
 	def dealData(self, data, fp):
 		for dt in data:
