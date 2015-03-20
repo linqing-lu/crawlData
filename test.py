@@ -13,8 +13,9 @@ cid = 20592113
 class Duobao:
 	filter1 = "\?cid="
 	filter2 = "index.do\?cid="
+	filter3 = "win.do\?cid="
 	baseurl = "http://1.163.com/user/index.do?cid=%d"
-	
+	winurl = "http://1.163.com/user/win.do?cid=%d"
 	urls = []
 	total_count = 0
 	def getdata(self):
