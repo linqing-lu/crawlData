@@ -9,14 +9,15 @@ from bs4 import BeautifulSoup
 from splinter import Browser
 from selenium import webdriver
 from pymongo import MongoClient
-
+cid = 44406430
 class Duobao:
 	filter1 = "\?cid="
 	filter2 = "index.do\?cid="
-	baseurl = "http://1.163.com/user/index.do?cid=41022423"
+	baseurl = "http://1.163.com/user/index.do?cid=%d"
+	
 	urls = []
 	def getdata(self):
-		url = str(self.baseurl)
+		url = str(self.baseurl) % (cid)
 		res = requests.get(url)
 		html = res.content
 		try:
@@ -84,6 +85,9 @@ class Duobao:
 		while running:
 			for dt in data:
 				print dt.text
+				# temp = dt.text.decode('utf8')
+				# m = re.findall(r'(\w*[0-9]+)(\W*[/u4e00-/u9fa5]+)\w*', temp)
+				# print m
 				fp.write(dt.text);
 				fp.write("\n=====================================\n")
 				print "====================================="
@@ -121,7 +125,7 @@ class Duobao:
 		driver.quit()
 
 	def fetchUrl(self, url):
-		url = str(self.baseurl)
+		url = str(self.baseurl) % (cid)
 		res = requests.get(url)
 		html = res.content
 		try:
@@ -153,5 +157,6 @@ class Duobao:
 
 db = Duobao()
 # db.getdata()
+db.baseurl = str(db.baseurl) % (cid)
 db.crawData(db.baseurl, 'table')
 # db.fetchUrl('http://1.163.com')
