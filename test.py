@@ -118,15 +118,15 @@ class Duobao(object):
 			if count == 0:
 				count = count + 1
 				continue
-			print dt.text
+			# print dt.text
 			total_price = 0
 			winner_price = 0
 			winner_info = {}
 			try:
 				col4 = dt.find_element_by_class_name('col4')
-				print col4.text
+				# print col4.text
 				prices = re.findall(r'(\w*[0-9]+)\w*', col4.text)
-				print prices
+				# print prices
 				self.total_cost = self.total_cost + int(prices[0])
 				self.total_count = self.total_count + 1
 			except Exception, e:
