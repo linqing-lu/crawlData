@@ -41,7 +41,7 @@ class Fetcher(object):
 		soup = BeautifulSoup(html, "lxml")
 		# print(soup.prettify())
 		# print(soup.find_all('a'))
-		links = soup.find_all('a', href=re.compile('http://1.163.com/user/index.do?cid='))
+		links = soup.find_all('a', href=re.compile('http://1.163.com/user/index.do'))
 		for link in links:
 			addr = link.get('href').strip()
 			if self.checkUrl(addr):
