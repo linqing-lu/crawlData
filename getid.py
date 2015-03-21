@@ -22,6 +22,7 @@ class Fetcher(object):
 		self.arg = arg
 		self.dbclient = MongoClient('mongodb://198.52.117.75', 27017)
 		self.db = self.dbclient.duobao
+		self.db.authenticate('test', 'duobao')
 		self.local_db_client = MongoClient('mongodb://localhost', 27017)
 		self.local_db = self.local_db_client.duobao
 

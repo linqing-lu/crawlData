@@ -31,6 +31,7 @@ class Duobao(object):
 		self.cid = cid
 		self.client = MongoClient('mongodb://198.52.117.75:27017/')
 		self.db = self.client.duobao
+		self.db.authenticate('test', 'duobao')
 
 	def getdata(self):
 		url = str(self.baseurl) % (self.cid)
@@ -248,6 +249,7 @@ def searchUserInfo(cid):
 def main():
 	client = MongoClient('mongodb://198.52.117.75:27017/')
 	db = client.duobao
+	db.authenticate('test', 'duobao')
 	collection = db.users
 	cid_data = collection.find_one({"searched": 0})
 	print cid_data
