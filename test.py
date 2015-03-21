@@ -5,12 +5,13 @@ import random
 import requests
 import re
 import codecs
+import hashlib
 from bs4 import BeautifulSoup
 from splinter import Browser
 from selenium import webdriver
 from pymongo import MongoClient
-cid = 15191257
-class Duobao:
+
+class Duobao(object):
 	filter1 = "\?cid="
 	filter2 = "index.do\?cid="
 	filter3 = "win.do\?cid="
@@ -18,8 +19,21 @@ class Duobao:
 	winurl = "http://1.163.com/user/win.do?cid=%d"
 	urls = []
 	total_count = 0
+	total_cost = 0
+	total_win = 0
+	cid = 15191257
+
+	client = 0
+	db = 0
+
+	def __init__(self, cid):
+		super(Duobao, self).__init__()
+		self.cid = cid
+		self.client = MongoClient('mongodb://198.52.117.75:27017/')
+		self.db = self.client.duobao
+
 	def getdata(self):
-		url = str(self.baseurl) % (cid)
+		url = str(self.baseurl) % (self.cid)
 		res = requests.get(url)
 		html = res.content
 		try:
@@ -76,7 +90,9 @@ class Duobao:
 			sp = BeautifulSoup(browser.html, "lxml")
 			print(sp.prettify())
 
-	def crawData(self, url, tag_name):
+	def crawData(self, tag_name):
+		url = str(self.baseurl) % (self.cid)
+		self.total_cost = 0
 		self.total_count = 0
 		driver = webdriver.PhantomJS()
 		driver.get(url);
@@ -94,21 +110,24 @@ class Duobao:
 				data = driver.find_elements_by_tag_name('table')
 		# fp.close()
 		driver.quit()
-		if self.total_count > 0:
-			save_data = {"_id": cid, "cid": cid, "total_count": self.total_count}
-			self.saveToMongoDB(save_data)
 
 	def dealData(self, data, fp):
+		count = 0;
 		for dt in data:
+			if count == 0:
+				count = count + 1
+				continue
 			print dt.text
 			total_price = 0
 			winner_price = 0
+			winner_info = {}
 			try:
 				col4 = dt.find_element_by_class_name('col4')
 				print col4.text
 				prices = re.findall(r'(\w*[0-9]+)\w*', col4.text)
 				print prices
-				self.total_count = self.total_count + int(prices[0])
+				self.total_cost = self.total_cost + int(prices[0])
+				self.total_count = self.total_count + 1
 			except Exception, e:
 				pass
 
@@ -119,85 +138,125 @@ class Duobao:
 				# print winner_name.text
 				winner_vote = winner_name.find_element_by_class_name('txt-dark')
 				winner_price = winner_vote.text
+				winner_info['cost'] = int(winner_price)
 				print winner_price	#
 			except Exception, e:
 				pass
 
 			try:
-				goods_price = dt.find_element_by_class_name('w-goods-price')
+				col2 = dt.find_element_by_class_name('col2')
+				goods_price = col2.find_element_by_class_name('w-goods-price')
 				print goods_price.text
 				total_price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
+				winner_info['price'] = int(total_price[0])
 			except Exception, e:
 				print 'Exception raise'
-			else:
-				pass
+
+			try:
+				col2 = dt.find_element_by_class_name('col2')
+				goods_name = col2.find_element_by_class_name('w-goods-title')
+				goods_name_a = goods_name.find_element_by_tag_name('a')
+				goods_title = goods_name_a.get_attribute('title')
+				numbers = re.findall(r'(\w*[0-9]+)\w*', goods_name_a.text)
+				goods_issue = int(numbers[0])
+				print goods_title
+				m = hashlib.md5()
+				m.update(goods_title.encode('utf8'))
+				winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
+				winner_info['issue'] = goods_issue
+				winner_info['title'] = goods_title
+			except Exception, e:
+				raise e
+
 			if total_price != 0:
 				print str("%s/%s") % (winner_price, total_price[0])
-			# temp = dt.text.decode('utf8')
-			# m = re.findall(r'(\w*[0-9]+)(\W*[/u4e00-/u9fa5]+)\w*', temp)
-			# print m
-			# fp.write(dt.text);
-			# fp.write("\n=====================================\n")
+				self.saveToMongoDB(winner_info, self.db.detail)
 			print "====================================="
 
-		print str("self.total_count = %d") % (self.total_count)
-
-	def crawData2(self, url, tag_name):
+		print str("self.total_cost = %d") % (self.total_cost)
+	def crawWinData(self, tag_name):
+		url = str(self.winurl) % (self.cid)
+		self.total_win = 0
 		driver = webdriver.PhantomJS()
 		driver.get(url);
-		# time.sleep(2)
-		# data = driver.find_element_by_tag_name(tag_name)
-		data = driver.find_elements_by_class_name('code')
-		for dt in data:
-			print dt.text
-		data2 = driver.find_elements_by_class_name('winner')
-		for dt2 in data2:
-			print dt2.text
+		running = True
+		# fp = codecs.open("/Users/lm/test.txt", 'a+', 'utf-8')
+		data = driver.find_elements_by_class_name('w-goodsList-item')
+		while running:
+			self.dealWinData(data, 0)
+			running = len(data) >= 12
+			print running
+			if running:
+				btn_next = driver.find_element_by_class_name('w-pager-next')
+				btn_next.click()
+				time.sleep(1)
+				data = driver.find_elements_by_class_name('w-goodsList-item')
+		# fp.close()
 		driver.quit()
-
-	def crawData3(self, url, tag_name):
-		driver = webdriver.PhantomJS()
-		driver.get(url);
-		data = driver.find_elements_by_tag_name('table')
+	def dealWinData(self, data, fp):
 		for dt in data:
-			print dt.text
-			print "====================================="
-		driver.quit()
+			# print dt.text
+			#获取title
+			goods_info = {}
+			try:
+				goods_name = dt.find_element_by_class_name('w-goods-title')
+				goods_name_a = goods_name.find_element_by_tag_name('a')
+				goods_title = goods_name_a.get_attribute('title')
+				print goods_title
+				m = hashlib.md5()
+				m.update(goods_title.encode('utf8'))
+				goods_info['_id'] = m.hexdigest()
+				goods_info['title'] = goods_title
+			except Exception, e:
+				raise e
+			#获取price
+			try:
+				goods_price = dt.find_element_by_class_name('w-goods-price')
+				price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
+				goods_info['price'] = int(price[0]);
+				self.total_win = self.total_win + goods_info['price']
+			except Exception, e:
+				raise e
+			print goods_info
+			self.saveToMongoDB(goods_info, self.db.goods)
 
-	def fetchUrl(self, url):
-		url = str(self.baseurl) % (cid)
-		res = requests.get(url)
-		html = res.content
-		try:
-			html = html.decode('utf-8')
-		except:
-			pass
-		# print(html)
-		soup = BeautifulSoup(html, "lxml")
-		# print(soup.prettify())
-		# print(soup.find_all('a'))
-		links = soup.find_all('a', href=re.compile('http://1.163.com'))
-		for link in links:
-			addr = link.get('href')
-			if self.checkUrl(addr):
-				pass
-			else:
-				print(str('---------------------fetchurl:') + addr)
-				self.urls.append(addr)
-				self.fetchUrl(addr)
-            
-	def saveToMongoDB(self, data):
-		client = MongoClient('mongodb://198.52.117.75:27017/')
-		db = client.duobao
-		collection = db.winners
-		collection.insert(data);
-		client.close()
-		
+	def saveToMongoDB(self, data, collection):
+		collection.save(data);
+
+	def saveCostDetail(self):
+		print self.total_cost
+		if self.total_cost > 0:
+			save_data = {"_id": self.cid, "total_cost": self.total_cost, "total_count": self.total_count, "total_win": self.total_win}
+			print save_data
+			self.saveToMongoDB(save_data, self.db.winners)
+	def uninit(self):
+		self.db.logout()
+		self.client.close()
+
 	def __unicode__(self):
 		return self.baseurl
 
-db = Duobao()
-# db.getdata()
-db.baseurl = str(db.baseurl) % (cid)
-db.crawData(db.baseurl, 'table')
-# db.fetchUrl('http://1.163.com')
+def searchUserInfo(cid):
+	print str("searchUserInfo %d") % (cid)
+	db = Duobao(cid)
+	# db.getdata()
+	db.crawData('table')
+	db.crawWinData('w-goodsList-item')
+	db.saveCostDetail()
+	db.uninit()
+
+def main():
+	client = MongoClient('mongodb://198.52.117.75:27017/')
+	db = client.duobao
+	collection = db.users
+	cid_data = collection.find_one({"searched": 0})
+	print cid_data
+	while cid_data['searched'] == 0:
+		cid_data['searched'] = 1
+		collection.save(cid_data)
+		searchUserInfo(int(cid_data['_id']))
+		cid_data = collection.find_one({"searched": 0})
+
+	client.close()
+if __name__ == '__main__':
+	main()

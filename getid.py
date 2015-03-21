@@ -65,14 +65,15 @@ class Fetcher(object):
 	#从URL中提取cid
 	def fetchCID(self, url):
 		SEARCH_PAT = re.compile(r'cid\s*=\s*(\d+)')
-	    src_line = url
-	    pat_search = SEARCH_PAT.search(src_line)
-	    if pat_search != None:
-	        cid = pat_search.group(1)
-	        print cid
-
+		src_line = url
+		pat_search = SEARCH_PAT.search(src_line)
+		if pat_search != None:
+			cid = pat_search.group(1)
+			print cid
+			id_data = {"_id": cid, "searched": 0}
+			self.saveToMongoDB(id_data, self.db.users)
 	def saveToMongoDB(self, data, collection):
-		collection.insert(data)
+		collection.save(data)
 
 	def uninit(self):
 		self.db.logout()
@@ -82,7 +83,9 @@ class Fetcher(object):
 		
 	def __unicode__(self):
 		return self.dbclient
-
-fetcher = Fetcher(0)
-fetcher.fetchUrl('http://1.163.com')
-fetcher.uninit()
+def main():
+	fetcher = Fetcher(0)
+	fetcher.fetchUrl('http://1.163.com')
+	fetcher.uninit()
+if __name__ == '__main__':
+	main()
