@@ -119,9 +119,9 @@ class Duobao(object):
 				count = count + 1
 				continue
 			# print dt.text
-			total_price = 0
-			winner_price = 0
-			winner_info = {}
+			# total_price = 0
+			# winner_price = 0
+			
 			try:
 				col4 = dt.find_element_by_class_name('col4')
 				# print col4.text
@@ -141,6 +141,7 @@ class Duobao(object):
 				raise e
 
 			if winned:
+				winner_info = {}
 				try:
 					winner = dt.find_element_by_class_name('winner')
 					# print winner.text
@@ -199,11 +200,14 @@ class Duobao(object):
 			running = len(data) >= 12
 			print running
 			if running:
-				btn_next = driver.find_element_by_class_name('w-pager-next')
-				btn_next.click()
-				time.sleep(1)
-				data = driver.find_elements_by_class_name('w-goodsList-item')
-		# fp.close()
+				try:
+					btn_next = driver.find_element_by_class_name('w-pager-next')
+					btn_next.click()
+					time.sleep(1)
+					data = driver.find_elements_by_class_name('w-goodsList-item')
+				except Exception, e:
+					running = False
+						# fp.close()
 		driver.quit()
 	def dealWinData(self, data, fp):
 		for dt in data:
@@ -272,4 +276,5 @@ def main():
 
 	client.close()
 if __name__ == '__main__':
-	main()
+	# main()
+	searchUserInfo(18488663)
