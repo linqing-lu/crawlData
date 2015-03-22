@@ -56,7 +56,7 @@ class Fetcher(object):
 		# 	if turl == url:
 		# 		return True
 		# return False
-		temp = re.findall(r'cid=(\w*[0-9]+)\w*', winner_url)
+		temp = re.findall(r'cid=(\w*[0-9]+)\w*', url)
 		if int(temp[0]) == int(cid):
 			return True
 		if self.local_db.urls.find({"_id": url}).count() > 0:
