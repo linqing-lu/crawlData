@@ -70,8 +70,8 @@ class Fetcher(object):
 		pat_search = SEARCH_PAT.search(src_line)
 		if pat_search != None:
 			cid = pat_search.group(1)
-			print cid
 			if self.db.users.find({"_id": cid}).count() == 0:
+				print str("%s saved") % (cid)
 				id_data = {"_id": cid, "searched": 0}
 				self.saveToMongoDB(id_data, self.db.users)
 	def saveToMongoDB(self, data, collection):
