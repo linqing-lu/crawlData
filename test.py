@@ -106,9 +106,12 @@ class Duobao(object):
 			print running
 			if running:
 				btn_next = driver.find_element_by_class_name('w-pager-next')
-				btn_next.click()
-				time.sleep(1)
-				data = driver.find_elements_by_tag_name('table')
+				if btn_next.is_enabled():
+					btn_next.click()
+					time.sleep(1)
+					data = driver.find_elements_by_tag_name('table')
+				else:
+					running = False
 		# fp.close()
 		driver.quit()
 
@@ -202,9 +205,12 @@ class Duobao(object):
 			if running:
 				try:
 					btn_next = driver.find_element_by_class_name('w-pager-next')
-					btn_next.click()
-					time.sleep(1)
-					data = driver.find_elements_by_class_name('w-goodsList-item')
+					if btn_next.is_enabled():
+						btn_next.click()
+						time.sleep(1)
+						data = driver.find_elements_by_class_name('w-goodsList-item')
+					else:
+						running = False
 				except Exception, e:
 					running = False
 						# fp.close()
@@ -279,4 +285,4 @@ def main():
 	client.close()
 if __name__ == '__main__':
 	main()
-	# searchUserInfo(18488663)
+	# searchUserInfo(20592113)
