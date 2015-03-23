@@ -132,58 +132,58 @@ class Duobao(object):
 			except Exception, e:
 				pass
 
-			winned = False
-			try:
-				col3 = dt.find_element_by_class_name('col3')
-				if col3.text == ("已揭晓").decode('utf8'):
-					winned = True
-			except Exception, e:
-				raise e
+			# winned = False
+			# try:
+			# 	col3 = dt.find_element_by_class_name('col3')
+			# 	if col3.text == ("已揭晓").decode('utf8'):
+			# 		winned = True
+			# except Exception, e:
+			# 	pass
 
-			if winned:
-				winner_info = {}
-				try:
-					winner = dt.find_element_by_class_name('winner')
-					# print winner.text
-					winner_name = winner.find_element_by_class_name('name')
-					winner_url = winner_name.find_element_by_tag_name('a').get_attribute('href')
-					temp = re.findall(r'cid=(\w*[0-9]+)\w*', winner_url)
-					winner_cid = int(temp[0])
-					winner_vote = winner_name.find_element_by_class_name('txt-dark')
-					winner_price = int(winner_vote.text)
-					winner_info['cost'] = winner_price
-					winner_info['winner_cid'] = winner_cid
-					# print winner_price	
-				except Exception, e:
-					raise e
+			# if winned:
+			# 	winner_info = {}
+			# 	try:
+			# 		winner = dt.find_element_by_class_name('winner')
+			# 		# print winner.text
+			# 		winner_name = winner.find_element_by_class_name('name')
+			# 		winner_url = winner_name.find_element_by_tag_name('a').get_attribute('href')
+			# 		temp = re.findall(r'cid=(\w*[0-9]+)\w*', winner_url)
+			# 		winner_cid = int(temp[0])
+			# 		winner_vote = winner_name.find_element_by_class_name('txt-dark')
+			# 		winner_price = int(winner_vote.text)
+			# 		winner_info['cost'] = winner_price
+			# 		winner_info['winner_cid'] = winner_cid
+			# 		# print winner_price	
+			# 	except Exception, e:
+			# 		continue
 
-				try:
-					col2 = dt.find_element_by_class_name('col2')
-					goods_price = col2.find_element_by_class_name('w-goods-price')
-					# print goods_price.text
-					total_price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
-					winner_info['price'] = int(total_price[0])
-				except Exception, e:
-					raise e
+			# 	try:
+			# 		col2 = dt.find_element_by_class_name('col2')
+			# 		goods_price = col2.find_element_by_class_name('w-goods-price')
+			# 		# print goods_price.text
+			# 		total_price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
+			# 		winner_info['price'] = int(total_price[0])
+			# 	except Exception, e:
+			# 		continue
 
-				try:
-					col2 = dt.find_element_by_class_name('col2')
-					goods_name = col2.find_element_by_class_name('w-goods-title')
-					goods_name_a = goods_name.find_element_by_tag_name('a')
-					goods_title = goods_name_a.get_attribute('title')
-					numbers = re.findall(r'(\w*[0-9]+)\w*', goods_name_a.text)
-					goods_issue = int(numbers[0])
-					winner = col2.find_element_by_class_name('winner')
-					# print goods_title
-					m = hashlib.md5()
-					m.update(goods_title.encode('utf8'))
-					winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
-					winner_info['issue'] = goods_issue
-					winner_info['title'] = goods_title
+			# 	try:
+			# 		col2 = dt.find_element_by_class_name('col2')
+			# 		goods_name = col2.find_element_by_class_name('w-goods-title')
+			# 		goods_name_a = goods_name.find_element_by_tag_name('a')
+			# 		goods_title = goods_name_a.get_attribute('title')
+			# 		numbers = re.findall(r'(\w*[0-9]+)\w*', goods_name_a.text)
+			# 		goods_issue = int(numbers[0])
+			# 		winner = col2.find_element_by_class_name('winner')
+			# 		# print goods_title
+			# 		m = hashlib.md5()
+			# 		m.update(goods_title.encode('utf8'))
+			# 		winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
+			# 		winner_info['issue'] = goods_issue
+			# 		winner_info['title'] = goods_title
 
-				except Exception, e:
-					raise e
-				self.saveToMongoDB(winner_info, self.db.detail)
+			# 	except Exception, e:
+			# 		continue
+			# 	self.saveToMongoDB(winner_info, self.db.detail)
 			# print "====================================="
 
 		print str("self.total_cost = %d") % (self.total_cost)
@@ -272,9 +272,11 @@ def main():
 		cid_data['searched'] = 1
 		collection.save(cid_data)
 		searchUserInfo(int(cid_data['_id']))
+		cid_data['searched'] = 2  #处理完毕
+		collection.save(cid_data)
 		cid_data = collection.find_one({"searched": 0})
 
 	client.close()
 if __name__ == '__main__':
-	# main()
-	searchUserInfo(18488663)
+	main()
+	# searchUserInfo(18488663)
