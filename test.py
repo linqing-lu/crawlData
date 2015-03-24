@@ -183,10 +183,11 @@ class Duobao(object):
 					winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
 					winner_info['issue'] = goods_issue
 					winner_info['title'] = goods_title
-
 				except Exception, e:
 					continue
-				self.saveToMongoDB(winner_info, self.db.detail)
+					
+				if self.db.detail.find({"_id": winner_info['_id']}).count() <= 0:
+					self.saveToMongoDB(winner_info, self.db.detail)
 		print "====================================="
 
 		print str("self.total_cost = %d") % (self.total_cost)
@@ -240,7 +241,8 @@ class Duobao(object):
 			except Exception, e:
 				raise e
 			print goods_info
-			self.saveToMongoDB(goods_info, self.db.goods)
+			if self.db.goods.find({"_id": goods_info['_id']}).count() <= 0:
+				self.saveToMongoDB(goods_info, self.db.goods)
 
 	def saveToMongoDB(self, data, collection):
 		collection.save(data);
@@ -285,4 +287,4 @@ def main():
 	client.close()
 if __name__ == '__main__':
 	main()
-	# searchUserInfo(20592113)
+	# searchUserInfo(35993017)
