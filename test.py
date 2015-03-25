@@ -127,6 +127,8 @@ class Duobao(object):
 			
 			try:
 				col4 = dt.find_element_by_class_name('col4')
+				if ("赠币").decode('utf8') in col4.text:
+					continue
 				# print col4.text
 				prices = re.findall(r'(\w*[0-9]+)\w*', col4.text)
 				# print prices
@@ -235,6 +237,8 @@ class Duobao(object):
 			#获取price
 			try:
 				goods_price = dt.find_element_by_class_name('w-goods-price')
+				if ("赠币").decode('utf8') in goods_price.text:
+					continue
 				price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
 				goods_info['price'] = int(price[0]);
 				self.total_win = self.total_win + goods_info['price']
@@ -253,6 +257,8 @@ class Duobao(object):
 			save_data = {"_id": self.cid, "total_cost": self.total_cost, "total_count": self.total_count, "total_win": self.total_win}
 			print save_data
 			self.saveToMongoDB(save_data, self.db.winners)
+			user_data = {"_id":str(self.cid), "searched": 2}
+			self.saveToMongoDB(user_data, self.db.users)
 	def uninit(self):
 		self.db.logout()
 		self.client.close()
@@ -280,11 +286,11 @@ def main():
 		cid_data['searched'] = 1
 		collection.save(cid_data)
 		searchUserInfo(int(cid_data['_id']))
-		cid_data['searched'] = 2  #处理完毕
-		collection.save(cid_data)
+		# cid_data['searched'] = 2  #处理完毕
+		# collection.save(cid_data)
 		cid_data = collection.find_one({"searched": 0})
 
 	client.close()
 if __name__ == '__main__':
-	main()
-	# searchUserInfo(35993017)
+	# main()
+	searchUserInfo(25978881)
