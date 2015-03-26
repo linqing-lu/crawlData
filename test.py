@@ -105,12 +105,15 @@ class Duobao(object):
 			running = len(data) > 10
 			print running
 			if running:
-				btn_next = driver.find_element_by_class_name('w-pager-next')
-				if btn_next.is_enabled():
-					btn_next.click()
-					time.sleep(1)
-					data = driver.find_elements_by_tag_name('table')
-				else:
+				try:
+					btn_next = driver.find_element_by_class_name('w-pager-next')
+					if btn_next.is_enabled():
+						btn_next.click()
+						time.sleep(1)
+						data = driver.find_elements_by_tag_name('table')
+					else:
+						running = False
+				except Exception, e:
 					running = False
 		# fp.close()
 		driver.quit()
@@ -142,8 +145,10 @@ class Duobao(object):
 				col3 = dt.find_element_by_class_name('col3')
 				if col3.text == ("已揭晓").decode('utf8'):
 					winned = True
+				else:
+					continue
 			except Exception, e:
-				pass
+				continue
 
 			if winned:
 				winner_info = {}
@@ -292,5 +297,5 @@ def main():
 
 	client.close()
 if __name__ == '__main__':
-	# main()
-	searchUserInfo(25978881)
+	main()
+	# searchUserInfo(40734073)
