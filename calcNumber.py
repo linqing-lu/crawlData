@@ -1,4 +1,6 @@
 #coding=utf-8
+import time
+import datetime
 
 A = 0
 B = 1
@@ -6,6 +8,10 @@ C = 28888
 D = 10000001
 x = 10006938
 E = 23085 #预测数
+MAXNUM = 235959999
+MINNUM = 0
+MAXNUM2 = 99999
+MINNUM2 = 0
 # （A + E) % C = x - D
 # A = x1 + x2 + ... + x50 = Xm + Xn
 # 在一定时间范围内(比如说一个小时内)求A的可能值
@@ -21,4 +27,20 @@ class CalcNumber(object):
 		self.number = x - D
 
 	def calc(self):
+		max_num = MAXNUM*50 + MAXNUM2
+		max_num2 = MAXNUM*50 + MINNUM2
+		now = datetime.datetime.now()
+		now_num_str = str("%02d%02d%02d%03d") % (now.hour, now.minute, now.second, now.microsecond/1000)
+		print (now_num_str)
+		now_num = int(now_num_str);
+		min_num = now_num * 50 + 0;
+
+		running = True
+		# while running:
+		begin_num = (x - min_num%C) 
+		print begin_num
+
+
+
+
 		
