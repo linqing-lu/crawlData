@@ -134,7 +134,7 @@ class Duobao(object):
 					continue
 				# print col4.text
 				prices = re.findall(r'(\w*[0-9]+)\w*', col4.text)
-				# print prices
+				print prices
 				self.total_cost = self.total_cost + int(prices[0])
 				self.total_count = self.total_count + 1
 			except Exception, e:
@@ -297,5 +297,5 @@ def main():
 
 	client.close()
 if __name__ == '__main__':
-	main()
-	# searchUserInfo(40734073)
+	# main()
+	searchUserInfo(23228258)
