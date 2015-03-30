@@ -102,19 +102,19 @@ class Duobao(object):
 		data = driver.find_elements_by_tag_name('table')
 		while running:
 			self.dealData(data, 0)
-			running = len(data) > 10
-			print running
-			if running:
-				try:
-					btn_next = driver.find_element_by_class_name('w-pager-next')
-					if btn_next.is_enabled():
-						btn_next.click()
-						time.sleep(1)
-						data = driver.find_elements_by_tag_name('table')
-					else:
-						running = False
-				except Exception, e:
+			# running = len(data) > 10
+			# print running
+			# if running:
+			try:
+				btn_next = driver.find_element_by_class_name('w-pager-next')
+				if btn_next.is_enabled():
+					btn_next.click()
+					time.sleep(1)
+					data = driver.find_elements_by_tag_name('table')
+				else:
 					running = False
+			except Exception, e:
+				running = False
 		# fp.close()
 		driver.quit()
 
@@ -280,6 +280,17 @@ def searchUserInfo(cid):
 	db.saveCostDetail()
 	db.uninit()
 
+def updateTopData(num, sort_data):
+	client = MongoClient('mongodb://198.52.117.75:27017/')
+	db = client.duobao
+	db.authenticate('test', 'duobao')
+	collection = db.winners
+	datas = collection.find({}, {"_id": 1}).sort(sort_data).limit(num)
+	print datas
+	for dt in datas:
+		searchUserInfo(int(dt['_id']))
+	db.logout()
+	client.close()
 def main():
 	client = MongoClient('mongodb://198.52.117.75:27017/')
 	db = client.duobao
@@ -291,11 +302,15 @@ def main():
 		cid_data['searched'] = 1
 		collection.save(cid_data)
 		searchUserInfo(int(cid_data['_id']))
-		# cid_data['searched'] = 2  #处理完毕
-		# collection.save(cid_data)
-		cid_data = collection.find_one({"searched": 0})
+
+		if collection.find({"searched": 3}).count() > 0:
+			cid_data = collection.find_one({"searched": 3})
+			cid_data['searched'] = 0
+		else:
+			cid_data = collection.find_one({"searched": 0})
 
 	client.close()
 if __name__ == '__main__':
-	# main()
-	searchUserInfo(23228258)
+	main()
+	# updateTopData(50, [("total_win", -1)])
+	# searchUserInfo(23228258)
