@@ -208,20 +208,19 @@ class Duobao(object):
 		data = driver.find_elements_by_class_name('w-goodsList-item')
 		while running:
 			self.dealWinData(data, 0)
-			running = len(data) >= 12
-			print running
-			if running:
-				try:
-					btn_next = driver.find_element_by_class_name('w-pager-next')
-					if btn_next.is_enabled():
-						btn_next.click()
-						time.sleep(1)
-						data = driver.find_elements_by_class_name('w-goodsList-item')
-					else:
-						running = False
-				except Exception, e:
+			# running = len(data) >= 12
+			# print running
+			# if running:
+			try:
+				btn_next = driver.find_element_by_class_name('w-pager-next')
+				if btn_next.is_enabled():
+					btn_next.click()
+					time.sleep(1)
+					data = driver.find_elements_by_class_name('w-goodsList-item')
+				else:
 					running = False
-						# fp.close()
+			except Exception, e:
+				running = False
 		driver.quit()
 	def dealWinData(self, data, fp):
 		for dt in data:
