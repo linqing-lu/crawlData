@@ -88,11 +88,8 @@ class Duobao(object):
 					if self.begin_goods_issue == self.winner['goods_issue']:
 						if self.begin_goods_title == self.winner['goods_title']:
 							return False
-				print self.begin_goods_issue
-				print self.begin_goods_title
-
 			except Exception, e:
-				raise e
+				return False
 			
 			try:
 				col4 = dt.find_element_by_class_name('col4')
