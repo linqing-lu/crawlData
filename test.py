@@ -32,64 +32,10 @@ class Duobao(object):
 		self.client = MongoClient('mongodb://198.52.117.75:27017/')
 		self.db = self.client.duobao
 		self.db.authenticate('test', 'duobao')
-
-	def getdata(self):
-		url = str(self.baseurl) % (self.cid)
-		res = requests.get(url)
-		html = res.content
-		try:
-			html = html.decode('utf-8')
-		except:
-			pass
-		# print(html)
-		soup = BeautifulSoup(html, "lxml")
-		# print(soup.prettify())
-		# print(soup.find_all('a'))
-		links = soup.find_all('a', href=re.compile(self.filter1))
-		for link in links:
-			addr = link.get('href')
-			if self.checkUrl(addr):
-				pass
-			else:
-				print(str('---------------------geturl:') + addr)
-				# self.getdatas(addr)
-				self.urls.append(addr)
-				self.getdatas(addr)
-			
-			# print(addr)
-	def getdatas(self, url):
-		self.crawData(url, 'code')
-		res = requests.get(url)
-		html = res.content
-		try:
-			html = html.decode('utf-8')
-		except:
-			pass
-		# print(html)
-		soup = BeautifulSoup(html, "lxml")
-		# print(soup.prettify())
-		# print(soup.find_all('a'))
-		links = soup.find_all('a', href=re.compile(self.filter2))
-		for link in links:
-			addr = link.get('href')
-			if self.checkUrl(addr):
-				print('url exists!')
-				pass
-			else:
-				print(str('---------------------geturl:') + addr)
-				self.urls.append(addr)
-				self.getdatas(addr)
-			
-	def checkUrl(self, url):
-		for turl in self.urls:
-			if turl == url:
-				return True
-		return False
-	def browseUrl(self, url):
-		with Browser('chrome') as browser:
-			browser.visit(url)
-			sp = BeautifulSoup(browser.html, "lxml")
-			print(sp.prettify())
+		self.winner = self.db.winners.find_one({"_id": cid})
+		print self.winner == None
+		self.begin_goods_issue = 0
+		self.begin_goods_title = ""
 
 	def crawData(self, tag_name):
 		url = str(self.baseurl) % (self.cid)
@@ -101,7 +47,8 @@ class Duobao(object):
 		# fp = codecs.open("/Users/lm/test.txt", 'a+', 'utf-8')
 		data = driver.find_elements_by_tag_name('table')
 		while running:
-			self.dealData(data, 0)
+			if self.dealData(data, 0) == False:
+				break
 			# running = len(data) > 10
 			# print running
 			# if running:
@@ -117,6 +64,7 @@ class Duobao(object):
 				running = False
 		# fp.close()
 		driver.quit()
+		print 'crawData end'
 
 	def dealData(self, data, fp):
 		count = 0;
@@ -124,9 +72,27 @@ class Duobao(object):
 			if count == 0:
 				count = count + 1
 				continue
-			# print dt.text
-			# total_price = 0
-			# winner_price = 0
+			goods_title = ""
+			goods_issue = 0
+			try:
+				col2 = dt.find_element_by_class_name('col2')
+				goods_name = col2.find_element_by_class_name('w-goods-title')
+				goods_name_a = goods_name.find_element_by_tag_name('a')
+				goods_title = goods_name_a.get_attribute('title')
+				numbers = re.findall(r'(\w*[0-9]+)\w*', goods_name_a.text)
+				goods_issue = int(numbers[0])
+				if self.begin_goods_issue == 0 and self.begin_goods_title == "":
+					self.begin_goods_issue = goods_issue
+					self.begin_goods_title = goods_title
+				if self.winner != None and self.winner.has_key('goods_title'):
+					if self.begin_goods_issue == self.winner['goods_issue']:
+						if self.begin_goods_title == self.winner['goods_title']:
+							return False
+				print self.begin_goods_issue
+				print self.begin_goods_title
+
+			except Exception, e:
+				raise e
 			
 			try:
 				col4 = dt.find_element_by_class_name('col4')
@@ -134,7 +100,7 @@ class Duobao(object):
 					continue
 				# print col4.text
 				prices = re.findall(r'(\w*[0-9]+)\w*', col4.text)
-				print prices
+				print prices[0]
 				self.total_cost = self.total_cost + int(prices[0])
 				self.total_count = self.total_count + 1
 			except Exception, e:
@@ -163,6 +129,9 @@ class Duobao(object):
 					winner_price = int(winner_vote.text)
 					winner_info['cost'] = winner_price
 					winner_info['winner_cid'] = winner_cid
+					winner_code = winner.find_element_by_class_name('code')
+					lucky_code = winner_code.find_elements_by_class_name('txt-impt').text
+					winner_info['lucky_code'] = int(lucky_code)
 					# print winner_price	
 				except Exception, e:
 					continue
@@ -177,14 +146,6 @@ class Duobao(object):
 					continue
 
 				try:
-					col2 = dt.find_element_by_class_name('col2')
-					goods_name = col2.find_element_by_class_name('w-goods-title')
-					goods_name_a = goods_name.find_element_by_tag_name('a')
-					goods_title = goods_name_a.get_attribute('title')
-					numbers = re.findall(r'(\w*[0-9]+)\w*', goods_name_a.text)
-					goods_issue = int(numbers[0])
-					winner = col2.find_element_by_class_name('winner')
-					# print goods_title
 					m = hashlib.md5()
 					m.update(goods_title.encode('utf8'))
 					winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
@@ -198,6 +159,7 @@ class Duobao(object):
 		print "====================================="
 
 		print str("self.total_cost = %d") % (self.total_cost)
+		return True
 	def crawWinData(self, tag_name):
 		url = str(self.winurl) % (self.cid)
 		self.total_win = 0
@@ -259,6 +221,15 @@ class Duobao(object):
 		print self.total_cost
 		if self.total_cost > 0:
 			save_data = {"_id": self.cid, "total_cost": self.total_cost, "total_count": self.total_count, "total_win": self.total_win}
+			if self.begin_goods_issue != 0:
+				save_data['goods_issue'] = self.begin_goods_issue
+				save_data['goods_title'] = self.begin_goods_title
+
+			if self.winner.has_key('total_cost'):
+				save_data['total_cost'] = self.total_cost + self.winner['total_cost']
+				save_data['total_count'] = self.total_count + self.winner['total_count']
+				save_data['total_win'] = self.total_win
+
 			print save_data
 			self.saveToMongoDB(save_data, self.db.winners)
 			user_data = {"_id":str(self.cid), "searched": 2}
@@ -312,4 +283,4 @@ def main():
 if __name__ == '__main__':
 	main()
 	# updateTopData(50, [("total_win", -1)])
-	# searchUserInfo(40160056)
+	# searchUserInfo(45872478)
