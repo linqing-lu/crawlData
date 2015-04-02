@@ -222,7 +222,7 @@ class Duobao(object):
 				save_data['goods_issue'] = self.begin_goods_issue
 				save_data['goods_title'] = self.begin_goods_title
 
-			if self.winner.has_key('total_cost'):
+			if self.winner != None and self.winner.has_key('total_cost'):
 				save_data['total_cost'] = self.total_cost + self.winner['total_cost']
 				save_data['total_count'] = self.total_count + self.winner['total_count']
 				save_data['total_win'] = self.total_win
@@ -280,4 +280,4 @@ def main():
 if __name__ == '__main__':
 	main()
 	# updateTopData(50, [("total_win", -1)])
-	# searchUserInfo(45872478)
+	# searchUserInfo(43831314)
