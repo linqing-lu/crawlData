@@ -312,4 +312,4 @@ def main():
 if __name__ == '__main__':
 	main()
 	# updateTopData(50, [("total_win", -1)])
-	# searchUserInfo(23228258)
+	# searchUserInfo(40160056)
