@@ -156,9 +156,9 @@ class Duobao(object):
 
 				self.saveToMongoDB(winner_info, self.db.detail)
 		print "====================================="
-
 		print str("self.total_cost = %d") % (self.total_cost)
 		return True
+
 	def crawWinData(self, tag_name):
 		url = str(self.winurl) % (self.cid)
 		self.total_win = 0
@@ -218,7 +218,7 @@ class Duobao(object):
 
 	def saveCostDetail(self):
 		print self.total_cost
-		if self.total_cost > 0:
+		if self.total_cost > 0 or self.total_win > 0:
 			save_data = {"_id": self.cid, "total_cost": self.total_cost, "total_count": self.total_count, "total_win": self.total_win}
 			if self.begin_goods_issue != 0:
 				save_data['goods_issue'] = self.begin_goods_issue
