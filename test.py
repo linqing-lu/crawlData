@@ -116,6 +116,18 @@ class Duobao(object):
 			if winned:
 				winner_info = {}
 				try:
+					m = hashlib.md5()
+					m.update(goods_title.encode('utf8'))
+					winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
+					winner_info['issue'] = goods_issue
+					winner_info['title'] = goods_title
+					goods_info = self.db.detail.find({"_id": winner_info['_id']})
+					if goods_info != None and goods_info.has_key('lucky_code'):
+						continue
+				except Exception, e:
+					continue
+
+				try:
 					winner = dt.find_element_by_class_name('winner')
 					# print winner.text
 					winner_name = winner.find_element_by_class_name('name')
@@ -142,17 +154,7 @@ class Duobao(object):
 				except Exception, e:
 					continue
 
-				try:
-					m = hashlib.md5()
-					m.update(goods_title.encode('utf8'))
-					winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
-					winner_info['issue'] = goods_issue
-					winner_info['title'] = goods_title
-				except Exception, e:
-					continue
-					
-				if self.db.detail.find({"_id": winner_info['_id']}).count() <= 0:
-					self.saveToMongoDB(winner_info, self.db.detail)
+				self.saveToMongoDB(winner_info, self.db.detail)
 		print "====================================="
 
 		print str("self.total_cost = %d") % (self.total_cost)
