@@ -187,31 +187,31 @@ class Duobao(object):
 		for dt in data:
 			# print dt.text
 			#获取title
-			goods_info = {}
-			try:
-				goods_name = dt.find_element_by_class_name('w-goods-title')
-				goods_name_a = goods_name.find_element_by_tag_name('a')
-				goods_title = goods_name_a.get_attribute('title')
-				# print goods_title
-				m = hashlib.md5()
-				m.update(goods_title.encode('utf8'))
-				goods_info['_id'] = m.hexdigest()
-				goods_info['title'] = goods_title
-			except Exception, e:
-				raise e
+			# goods_info = {}
+			# try:
+			# 	goods_name = dt.find_element_by_class_name('w-goods-title')
+			# 	goods_name_a = goods_name.find_element_by_tag_name('a')
+			# 	goods_title = goods_name_a.get_attribute('title')
+			# 	# print goods_title
+			# 	m = hashlib.md5()
+			# 	m.update(goods_title.encode('utf8'))
+			# 	goods_info['_id'] = m.hexdigest()
+			# 	goods_info['title'] = goods_title
+			# except Exception, e:
+			# 	raise e
 			#获取price
 			try:
 				goods_price = dt.find_element_by_class_name('w-goods-price')
 				if ("赠币").decode('utf8') in goods_price.text:
 					continue
 				price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
-				goods_info['price'] = int(price[0]);
-				self.total_win = self.total_win + goods_info['price']
+				# goods_info['price'] = int(price[0])
+				self.total_win = self.total_win + int(price[0])
 			except Exception, e:
 				raise e
-			print goods_info
-			if self.db.goods.find({"_id": goods_info['_id']}).count() <= 0:
-				self.saveToMongoDB(goods_info, self.db.goods)
+			# print goods_info
+			# if self.db.goods.find({"_id": goods_info['_id']}).count() <= 0:
+			# 	self.saveToMongoDB(goods_info, self.db.goods)
 
 	def saveToMongoDB(self, data, collection):
 		collection.save(data);
