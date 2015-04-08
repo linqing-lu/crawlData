@@ -167,6 +167,7 @@ class Duobao(object):
 		driver.get(url);
 		running = True
 		# fp = codecs.open("/Users/lm/test.txt", 'a+', 'utf-8')
+		time.sleep(1)
 		data = driver.find_elements_by_class_name('w-goodsList-item')
 		while running:
 			self.dealWinData(data, 0)
