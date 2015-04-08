@@ -34,8 +34,7 @@ class Duobao(object):
 		self.db.authenticate('test', 'duobao')
 		self.winner = self.db.winners.find_one({"_id": cid})
 		print self.winner == None
-		self.begin_goods_issue = 0
-		self.begin_goods_title = ""
+		self.begin_goods_issue = ""
 
 	def crawData(self, tag_name):
 		url = str(self.baseurl) % (self.cid)
@@ -45,6 +44,7 @@ class Duobao(object):
 		driver.get(url);
 		running = True
 		# fp = codecs.open("/Users/lm/test.txt", 'a+', 'utf-8')
+		time.sleep(1)
 		data = driver.find_elements_by_tag_name('table')
 		while running:
 			if self.dealData(data, 0) == False:
@@ -72,30 +72,31 @@ class Duobao(object):
 			if count == 0:
 				count = count + 1
 				continue
-			goods_title = ""
-			goods_issue = 0
+			goods_issue = ""
 			try:
 				col2 = dt.find_element_by_class_name('col2')
+				if ("赠币").decode('utf8') in col2.text:
+					continue
 				goods_name = col2.find_element_by_class_name('w-goods-title')
 				goods_name_a = goods_name.find_element_by_tag_name('a')
 				goods_title = goods_name_a.get_attribute('title')
 				numbers = re.findall(r'(\w*[0-9]+)\w*', goods_name_a.text)
-				goods_issue = int(numbers[0])
-				if self.begin_goods_issue == 0 and self.begin_goods_title == "":
+				issue = int(numbers[0])
+				m = hashlib.md5()
+				m.update(goods_title.encode('utf8'))
+				goods_issue = str("%s_%d") % (m.hexdigest(), issue)
+				if self.begin_goods_issue == "":
 					self.begin_goods_issue = goods_issue
-					self.begin_goods_title = goods_title
-				if self.winner != None and self.winner.has_key('goods_title'):
-					if self.begin_goods_issue == self.winner['goods_issue']:
-						if self.begin_goods_title == self.winner['goods_title']:
+				if self.winner != None:
+					if self.winner.has_key('goods_issue'):
+						if goods_issue == self.winner['goods_issue']:
+							print 'repeat'
 							return False
 			except Exception, e:
 				continue
 			
 			try:
 				col4 = dt.find_element_by_class_name('col4')
-				if ("赠币").decode('utf8') in col4.text:
-					continue
-				# print col4.text
 				prices = re.findall(r'(\w*[0-9]+)\w*', col4.text)
 				print prices[0]
 				self.total_cost = self.total_cost + int(prices[0])
@@ -116,9 +117,9 @@ class Duobao(object):
 			if winned:
 				winner_info = {}
 				try:
-					m = hashlib.md5()
-					m.update(goods_title.encode('utf8'))
-					winner_info['_id'] = str("%s_%d") % (m.hexdigest(), goods_issue)
+					# m = hashlib.md5()
+					# m.update(goods_title.encode('utf8'))
+					winner_info['_id'] = goods_issue
 					winner_info['issue'] = goods_issue
 					winner_info['title'] = goods_title
 					goods_info = self.db.detail.find({"_id": winner_info['_id']})
@@ -220,9 +221,8 @@ class Duobao(object):
 		print self.total_cost
 		if self.total_cost > 0 or self.total_win > 0:
 			save_data = {"_id": self.cid, "total_cost": self.total_cost, "total_count": self.total_count, "total_win": self.total_win}
-			if self.begin_goods_issue != 0:
+			if self.begin_goods_issue != "":
 				save_data['goods_issue'] = self.begin_goods_issue
-				save_data['goods_title'] = self.begin_goods_title
 
 			if self.winner != None and self.winner.has_key('total_cost'):
 				save_data['total_cost'] = self.total_cost + self.winner['total_cost']
@@ -282,4 +282,4 @@ def main():
 if __name__ == '__main__':
 	main()
 	# updateTopData(50, [("total_win", -1)])
-	# searchUserInfo(43831314)
+	# searchUserInfo(20592113)
