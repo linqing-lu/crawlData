@@ -26,7 +26,7 @@ class GoodsInfo(object):
 		self.db = self.dbclient.duobao
 		self.db.authenticate('test', 'duobao')
 		self.session = requests.Session()
-		r = session.get('http://1.163.com',headers=post_headers)
+		r = self.session.get('http://1.163.com',headers=post_headers)
 		if r.status_code == 200:
 			cookie = r.headers['set-cookie']
 			strs = cookie.split(';')
