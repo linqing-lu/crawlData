@@ -104,58 +104,58 @@ class Duobao(object):
 			except Exception, e:
 				pass
 
-			winned = False
-			try:
-				col3 = dt.find_element_by_class_name('col3')
-				if col3.text == ("已揭晓").decode('utf8'):
-					winned = True
-				else:
-					continue
-			except Exception, e:
-				continue
+			# winned = False
+			# try:
+			# 	col3 = dt.find_element_by_class_name('col3')
+			# 	if col3.text == ("已揭晓").decode('utf8'):
+			# 		winned = True
+			# 	else:
+			# 		continue
+			# except Exception, e:
+			# 	continue
 
-			if winned:
-				winner_info = {}
-				try:
-					# m = hashlib.md5()
-					# m.update(goods_title.encode('utf8'))
-					winner_info['_id'] = goods_issue
-					winner_info['issue'] = goods_issue
-					winner_info['title'] = goods_title
-					goods_info = self.db.detail.find({"_id": winner_info['_id']})
-					if goods_info != None and goods_info.has_key('lucky_code'):
-						continue
-				except Exception, e:
-					continue
+			# if winned:
+			# 	winner_info = {}
+			# 	try:
+			# 		# m = hashlib.md5()
+			# 		# m.update(goods_title.encode('utf8'))
+			# 		winner_info['_id'] = goods_issue
+			# 		winner_info['issue'] = goods_issue
+			# 		winner_info['title'] = goods_title
+			# 		goods_info = self.db.detail.find({"_id": winner_info['_id']})
+			# 		if goods_info != None and goods_info.has_key('lucky_code'):
+			# 			continue
+			# 	except Exception, e:
+			# 		continue
 
-				try:
-					winner = dt.find_element_by_class_name('winner')
-					# print winner.text
-					winner_name = winner.find_element_by_class_name('name')
-					winner_url = winner_name.find_element_by_tag_name('a').get_attribute('href')
-					temp = re.findall(r'cid=(\w*[0-9]+)\w*', winner_url)
-					winner_cid = int(temp[0])
-					winner_vote = winner_name.find_element_by_class_name('txt-dark')
-					winner_price = int(winner_vote.text)
-					winner_info['cost'] = winner_price
-					winner_info['winner_cid'] = winner_cid
-					winner_code = winner.find_element_by_class_name('code')
-					lucky_code = winner_code.find_elements_by_class_name('txt-impt').text
-					winner_info['lucky_code'] = int(lucky_code)
-					# print winner_price	
-				except Exception, e:
-					continue
+			# 	try:
+			# 		winner = dt.find_element_by_class_name('winner')
+			# 		# print winner.text
+			# 		winner_name = winner.find_element_by_class_name('name')
+			# 		winner_url = winner_name.find_element_by_tag_name('a').get_attribute('href')
+			# 		temp = re.findall(r'cid=(\w*[0-9]+)\w*', winner_url)
+			# 		winner_cid = int(temp[0])
+			# 		winner_vote = winner_name.find_element_by_class_name('txt-dark')
+			# 		winner_price = int(winner_vote.text)
+			# 		winner_info['cost'] = winner_price
+			# 		winner_info['winner_cid'] = winner_cid
+			# 		winner_code = winner.find_element_by_class_name('code')
+			# 		lucky_code = winner_code.find_elements_by_class_name('txt-impt').text
+			# 		winner_info['lucky_code'] = int(lucky_code)
+			# 		# print winner_price	
+			# 	except Exception, e:
+			# 		continue
 
-				try:
-					col2 = dt.find_element_by_class_name('col2')
-					goods_price = col2.find_element_by_class_name('w-goods-price')
-					# print goods_price.text
-					total_price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
-					winner_info['price'] = int(total_price[0])
-				except Exception, e:
-					continue
+			# 	try:
+			# 		col2 = dt.find_element_by_class_name('col2')
+			# 		goods_price = col2.find_element_by_class_name('w-goods-price')
+			# 		# print goods_price.text
+			# 		total_price = re.findall(r'(\w*[0-9]+)\w*', goods_price.text)
+			# 		winner_info['price'] = int(total_price[0])
+			# 	except Exception, e:
+			# 		continue
 
-				self.saveToMongoDB(winner_info, self.db.detail)
+			# 	self.saveToMongoDB(winner_info, self.db.detail)
 		print "====================================="
 		print str("self.total_cost = %d") % (self.total_cost)
 		return True
