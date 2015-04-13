@@ -50,7 +50,18 @@ class Goods(object):
 			print result['pageNum']
 			costlist = result['list']
 			for cost in costlist:
-				pass
+				costinfo = {}
+				costinfo['cid'] = int(cost['user']['cid'])
+				costinfo['cost_num'] = cost['num']
+				costinfo['cost_time'] = cost['time']
+				costinfo['cost_id'] = cost['rid']
+				costinfo['uid'] = cost['user']['uid']
+				costinfo['ip_address'] = cost['user']['IPAddress']
+				costinfo['nickname'] = cost['user']['nickname']
+				costinfo['_id'] = str("%d_%d_%d") % (self.gid, self.period, cost['rid'])
+				print costinfo
+				break;
+
 def main():
 	g = Goods(146, 344)
 	g.checkCost()
