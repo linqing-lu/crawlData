@@ -266,19 +266,22 @@ def main():
 	db = client.duobao
 	db.authenticate('test', 'duobao')
 	collection = db.users
-	cid_data = collection.find_one({"searched": 0})
-	print cid_data
-	while cid_data['searched'] == 0:
-		cid_data['searched'] = 1
-		collection.save(cid_data)
-		searchUserInfo(int(cid_data['_id']))
 
-		if collection.find({"searched": 3}).count() > 0:
+	while True:
+		try:
 			cid_data = collection.find_one({"searched": 3})
-			cid_data['searched'] = 0
-		else:
-			cid_data = collection.find_one({"searched": 0})
+			cid_data['searched'] = 1
+			collection.save(cid_data)
+			searchUserInfo(int(cid_data['_id']))
 
+			# if collection.find({"searched": 3}).count() > 0:
+			# 	cid_data = collection.find_one({"searched": 3})
+			# 	cid_data['searched'] = 0
+			# else:
+			# 	cid_data = collection.find_one({"searched": 0})
+		except Exception, e:
+			time.sleep(5)
+		
 	client.close()
 if __name__ == '__main__':
 	main()
