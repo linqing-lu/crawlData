@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from splinter import Browser
 from selenium import webdriver
 from pymongo import MongoClient
+from record import DuobaoRecord
 
 class Duobao(object):
 	filter1 = "\?cid="
@@ -241,10 +242,19 @@ class Duobao(object):
 	def __unicode__(self):
 		return self.baseurl
 
-def searchUserInfo(cid):
+def searchUserInfo(cid, collection):
 	print str("searchUserInfo %d") % (cid)
+	dr = DuobaoRecord(cid)
+	dr.queryRecord()
+	save_data = {'_id': dr.cid}
+	save_data['total_cost'] = dr.total_cost
+	save_data['total_count'] = dr.total_count
+	save_data['total_win'] = dr.total_win
+	save_data['total_profit'] = dr.total_win - dr.total_cost
+	print save_data
+	collection.save(save_data)
+def searchUserInfo2(cid):
 	db = Duobao(cid)
-	# db.getdata()
 	db.crawData('table')
 	db.crawWinData('w-goodsList-item')
 	db.saveCostDetail()
@@ -272,7 +282,7 @@ def main():
 			cid_data = collection.find_one({"searched": 3})
 			cid_data['searched'] = 1
 			collection.save(cid_data)
-			searchUserInfo(int(cid_data['_id']))
+			searchUserInfo(int(cid_data['_id']),db.winners)
 
 			# if collection.find({"searched": 3}).count() > 0:
 			# 	cid_data = collection.find_one({"searched": 3})
@@ -281,7 +291,7 @@ def main():
 			# 	cid_data = collection.find_one({"searched": 0})
 		except Exception, e:
 			time.sleep(5)
-		
+	db.logout()	
 	client.close()
 if __name__ == '__main__':
 	main()
