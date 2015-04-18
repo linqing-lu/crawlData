@@ -55,6 +55,9 @@ class DuobaoRecord(object):
 				# print res.headers
 				result = res.json()['result']
 				totalCnt = result['totalCnt']
+				if totalCnt <= 0:
+					running = False
+					break
 				page_num = result['pageNum']
 				page_size = result['pageSize']
 				rlist = result['list']
@@ -79,7 +82,7 @@ class DuobaoRecord(object):
 		return self.cid
 
 def main():
-	dr = DuobaoRecord(46607149)
+	dr = DuobaoRecord(45565593)
 	dr.queryRecord()
 	save_data = {'_id': dr.cid}
 	save_data['total_cost'] = dr.total_cost
