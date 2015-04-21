@@ -72,7 +72,7 @@ class GoodsInfo(object):
 	def saveToMongoDB(self, data, collection):
 		collection.save(data)
 def main():
-	for gid in range(100,999):
+	for gid in range(1,999):
 		try:
 			g = GoodsInfo(gid)
 			minIssue = 1

@@ -61,8 +61,8 @@ class DuobaoRecord(object):
 				page_num = result['pageNum']
 				page_size = result['pageSize']
 				rlist = result['list']
+				self.cur_count = self.cur_count + len(rlist)
 				for rec in rlist:
-					self.cur_count = self.cur_count + 1
 					if int(rec['type']) == 0:
 						self.total_cost = self.total_cost + rec['num']
 						self.total_count = self.total_count + 1
