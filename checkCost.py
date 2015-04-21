@@ -26,6 +26,7 @@ class Goods(object):
 		self.period = period
 		self.collection = collection
 		self.cur_count = 0
+		self.all_list = []
 		self.session = requests.Session()
 		url = str("http://1.163.com/detail/%02d-%02d-%02d-%02d-%02d.html") \
 		% (gid/100, gid%100, period/10000, period%10000/100, period%100)
@@ -107,6 +108,39 @@ class Goods(object):
 					running = False
 			else:
 				running = False
+	def checkCost2(self):
+		page_size = 50
+		page_num = 1
+		totalCnt = 0;
+		info = {'gid':self.gid,'period':self.period,'t':self.t,'token':self.token}
+		running = True
+		max_rid = self.getMaxRid()
+		while running:
+			info['pageSize'] = page_size
+			info['pageNum'] = page_num
+			info['totalCnt'] = totalCnt
+			res = self.session.get(base_url, params=info)
+			if res.status_code == 200:
+				result = res.json()
+				result = result['result']
+				totalCnt = result['totalCnt']
+				if totalCnt <= 0:
+					running = False
+					break
+				page_size = result['pageSize']
+				page_num = result['pageNum']
+				costlist = result['list']
+				self.cur_count = self.cur_count + len(costlist)
+				costlist.sort(cmp=list_cmp)
+				self.all_list.extend(costlist)
+				progress = float(self.cur_count)/float(totalCnt) * 100
+				print ("%0.2f%%") % (progress)
+				if totalCnt > page_size * page_num:
+					page_num = page_num + 1
+				else:
+					running = False
+			else:
+				running = False
 	def getMaxRid(self):
 		data = self.collection.find({"gid":self.gid,"period":self.period},{"cost_id": 1}).sort([("cost_id", -1)]).limit(1)
 		print data
@@ -122,8 +156,10 @@ def main():
 	client = MongoClient("mongodb://198.52.117.75", 27017)
 	db = client.duobao
 	db.authenticate('test', 'duobao')
-	g = Goods(40, 745, db.costs)
-	g.checkCost()
+	g = Goods(40, 743, db.costs)
+	g.checkCost2()
+	print len(g.all_list)
+	# print g.all_list
 	# print g.getMaxRid()
 
 	db.logout()
