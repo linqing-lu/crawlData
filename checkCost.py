@@ -89,7 +89,8 @@ class Goods(object):
 					except Exception, e:
 						costinfo_t = self.collection.find_one({"_id": costinfo['_id']})
 						costinfo['cost_num'] = costinfo['cost_num'] + costinfo_t['cost_num']
-						costinfo['cost_id'] = costinfo_t['cost_id']
+						if max_rid <= 0:
+							costinfo['cost_id'] = costinfo_t['cost_id']
 						self.collection.save(costinfo)
 						print costinfo
 				if not running:
