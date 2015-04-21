@@ -24,6 +24,7 @@ class DuobaoRecord(object):
 		self.total_win = 0
 		self.total_count = 0
 		self.cur_count = 0
+		self.all_lsit = []
 		self.session = requests.Session()
 		r = self.session.get("http://1.163.com")
 		if r.status_code == 200:
@@ -78,18 +79,53 @@ class DuobaoRecord(object):
 					running = False
 			else:
 				running = False
+	def queryRecord2(self):
+		page_num = 1
+		page_size = 100
+		totalCnt = 0
+		info = {'cid':self.cid, 'pageSize':page_size,'pageNum':page_num,'t':self.t,'token':self.token}
+		info['status'] = 9
+		info['region'] = 0
+
+		running = True
+		while running:
+			info['pageNum'] = page_num
+			info['totalCnt'] = totalCnt
+			info['pageSize'] = page_size
+			res = self.session.get(base_url, params=info)
+			if res.status_code == 200:
+				# print res.headers
+				result = res.json()['result']
+				totalCnt = result['totalCnt']
+				if totalCnt <= 0:
+					running = False
+					break
+				page_num = result['pageNum']
+				page_size = result['pageSize']
+				rlist = result['list']
+				self.cur_count = self.cur_count + len(rlist)
+				self.all_lsit.extend(rlist)
+				progress = float(self.cur_count)/float(totalCnt) * 100
+				print ("%0.2f%%") % (progress)
+				if totalCnt > page_size * page_num:
+					page_num = page_num + 1
+				else:
+					running = False
+			else:
+				running = False
 	def __unicode__(self):
 		return self.cid
 
 def main():
-	dr = DuobaoRecord(45565593)
-	dr.queryRecord()
-	save_data = {'_id': dr.cid}
-	save_data['total_cost'] = dr.total_cost
-	save_data['total_count'] = dr.total_count
-	save_data['total_win'] = dr.total_win
-	save_data['total_profit'] = dr.total_win - dr.total_cost
-	print save_data
+	dr = DuobaoRecord(13578716)
+	dr.queryRecord2()
+	print len(dr.all_lsit)
+	# save_data = {'_id': dr.cid}
+	# save_data['total_cost'] = dr.total_cost
+	# save_data['total_count'] = dr.total_count
+	# save_data['total_win'] = dr.total_win
+	# save_data['total_profit'] = dr.total_win - dr.total_cost
+	# print save_data
 
 if __name__ == '__main__':
 	main()
