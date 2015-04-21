@@ -17,7 +17,8 @@ user_agent = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) "
               "Chrome/36.0.1985.143 Safari/537.36")
 
 post_headers = {"User-Agent": user_agent,"Referer": "http://1.163.com"}
-
+def list_cmp(a1, a2):
+	return 0 - cmp(a1['rid'], a2['rid'])
 class Goods(object):
 	def __init__(self, gid, period, collection):
 		super(Goods, self).__init__()
@@ -67,7 +68,9 @@ class Goods(object):
 				costlist = result['list']
 				self.cur_count = self.cur_count + len(costlist)
 				print max_rid
+				costlist.sort(cmp=list_cmp)
 				for cost in costlist:
+					print cost['rid']
 					if int(cost['rid']) <= int(max_rid):
 						running = False
 						break
