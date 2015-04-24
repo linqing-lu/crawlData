@@ -156,8 +156,12 @@ def main():
 	client = MongoClient("mongodb://198.52.117.75", 27017)
 	db = client.duobao
 	db.authenticate('test', 'duobao')
-	g = Goods(40, 743, db.costs)
-	g.checkCost2()
+	g = Goods(117, 22, db.costs)
+	g.checkCost()
+	g = Goods(112, 166, db.costs)
+	g.checkCost()
+	g = Goods(181, 46, db.costs)
+	g.checkCost()
 	print len(g.all_list)
 	# print g.all_list
 	# print g.getMaxRid()
