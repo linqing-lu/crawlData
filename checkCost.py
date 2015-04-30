@@ -153,16 +153,17 @@ class Goods(object):
 			retVal = 0
 			return retVal
 def main():
-	client = MongoClient("mongodb://198.52.117.75", 27017)
+	client = MongoClient("mongodb://23.236.78.15", 27017)
 	db = client.duobao
 	db.authenticate('test', 'duobao')
-	g = Goods(117, 22, db.costs)
-	g.checkCost()
-	g = Goods(112, 166, db.costs)
-	g.checkCost()
-	g = Goods(181, 46, db.costs)
-	g.checkCost()
-	print len(g.all_list)
+	for i in range(1, 5):
+		g = Goods(117, 25-i, db.costs)
+		g.checkCost()
+		g = Goods(112, 180-i, db.costs)
+		g.checkCost()
+		g = Goods(181, 50-i, db.costs)
+		g.checkCost()
+		print len(g.all_list)
 	# print g.all_list
 	# print g.getMaxRid()
 

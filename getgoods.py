@@ -22,7 +22,7 @@ class GoodsInfo(object):
 	def __init__(self, goods_id):
 		super(GoodsInfo, self).__init__()
 		self.goods_id = goods_id
-		self.dbclient = MongoClient('mongodb://198.52.117.75', 27017)
+		self.dbclient = MongoClient('mongodb://23.236.78.15', 27017)
 		self.db = self.dbclient.duobao
 		self.db.authenticate('test', 'duobao')
 		self.session = requests.Session()
