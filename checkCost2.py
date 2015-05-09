@@ -11,19 +11,14 @@ from splinter import Browser
 from selenium import webdriver
 from pymongo import MongoClient
 
-base_url_code = "http://1.163.com/code/get.do?"
 base_url = "http://1.163.com/record/getDuobaoRecord.do?"
 user_agent = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) "
               "AppleWebKit/537.36 (KHTML, like Gecko) "
               "Chrome/36.0.1985.143 Safari/537.36")
-login_url = "https://reg.163.com/login.jsp"
-logininfo = {"username": "", "password": "","product": "mail163","url":"http://1.163.com","savelogin":""}
 
 post_headers = {"User-Agent": user_agent,"Referer": "http://1.163.com"}
 def list_cmp(a1, a2):
 	return 0 - cmp(a1['rid'], a2['rid'])
-def list_cmp2(a1, a2):
-	return cmp(a1['rid'], a2['rid'])
 class Goods(object):
 	def __init__(self, gid, period, collection):
 		super(Goods, self).__init__()
@@ -33,7 +28,6 @@ class Goods(object):
 		self.cur_count = 0
 		self.all_list = []
 		self.session = requests.Session()
-		self.login_session = requests.Session()
 		url = str("http://1.163.com/detail/%02d-%02d-%02d-%02d-%02d.html") \
 		% (gid/100, gid%100, period/10000, period%10000/100, period%100)
 		print url
@@ -50,15 +44,7 @@ class Goods(object):
 			print 'create session success'
 		else:
 			print 'create session failed'
-	def login(self):
-		logininfo['username'] = 'xxx@163.com'
-		logininfo['password'] = 'xxxx'
-		login_res = self.login_session.post(login_url, data=logininfo,headers=post_headers,)
-		print login_res.status_code
-		if login_res.status_code == 200:
-			return True
-		else:
-			return False
+
 	def checkCost(self):
 		page_size = 50
 		page_num = 1
@@ -145,7 +131,7 @@ class Goods(object):
 				page_num = result['pageNum']
 				costlist = result['list']
 				self.cur_count = self.cur_count + len(costlist)
-				# costlist.sort(cmp=list_cmp)
+				costlist.sort(cmp=list_cmp)
 				self.all_list.extend(costlist)
 				progress = float(self.cur_count)/float(totalCnt) * 100
 				print ("%0.2f%%") % (progress)
@@ -155,7 +141,6 @@ class Goods(object):
 					running = False
 			else:
 				running = False
-		self.all_list.sort(cmp=list_cmp2)
 	def getMaxRid(self):
 		data = self.collection.find({"gid":self.gid,"period":self.period},{"cost_id": 1}).sort([("cost_id", -1)]).limit(1)
 		print data
@@ -167,49 +152,15 @@ class Goods(object):
 		except Exception, e:
 			retVal = 0
 			return retVal
-	def getNumbers(self, cid):
-		info = {'gid':self.gid,'period':self.period,'t':self.t,'token':self.token}
-		info['cid'] = cid
-		res = self.login_session.get(base_url_code, params=info)
-		if res.status_code == 200:
-			result = res.json()
-			result = result['result']
-			codelist = result['list']
-			for codes in codelist:
-				for code in codes['code']:
-					print int(code);
-	def getCodePosition(self, cid):
-		count = 0
-		for info in self.all_list:
-			u_cid = int(info['user']['cid'])
-			num = int(info['num'])
-			if cid == u_cid:
-				print str('rid:%d, num:%d') % (int(info['rid']), num)
-				for i in range(1, num+1):
-					count = count + 1
-					print count
-			else:
-				count = count + num
-
 def main():
-	client = MongoClient("mongodb://23.236.78.15", 27017)
+	client = MongoClient("mongodb://198.52.117.75", 27017)
 	db = client.duobao
 	db.authenticate('test', 'duobao')
-	# for i in range(1, 5):
-	# 	g = Goods(117, 25-i, db.costs)
-	# 	g.checkCost()
-	# 	g = Goods(112, 185-i, db.costs)
-	# 	g.checkCost()
-	# 	g = Goods(181, 50-i, db.costs)
-	# 	g.checkCost()
-	# 	print len(g.all_list)
+	g = Goods(40, 747, db.costs)
+	g.checkCost()
+	print len(g.all_list)
 	# print g.all_list
 	# print g.getMaxRid()
-	g = Goods(117, 25, db.costs)
-	g.checkCost2()
-	g.getCodePosition(20592113)
-	# g.getNumbers(47803250)
-	
 
 	db.logout()
 	client.close()
